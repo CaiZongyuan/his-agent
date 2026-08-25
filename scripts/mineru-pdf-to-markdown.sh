@@ -246,7 +246,7 @@ MARKDOWN_PATH=$extracted_dir/full.md node -e '
   for (const match of markdown.matchAll(/!\[[^\]]*\]\((images\/[^)]+)\)/g)) {
     paths.add(match[1]);
   }
-  process.stdout.write([...paths].join("\n"));
+  console.log([...paths].join("\n"));
 ' > "$image_manifest"
 
 while IFS= read -r relative_image; do
