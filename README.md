@@ -25,6 +25,13 @@
 | 📚 **学习与教学** | 学习理解相关论文与开源项目，产出教程、讲解与练习 | [`docs/papers/`](docs/papers/INDEX.md) · [`docs/lessons/`](docs/lessons/) |
 | 🧪 **实验** | 在理解的基础上做实验：数据、模型与产物管理 | `data/` · `models/` · `outputs/` |
 
+## 🔥 当前主线：问诊沙盘（Consultation Sandbox）
+
+**一个引擎，四种部署**——辅助问诊 / 虚拟问诊 / 问诊教学 / 问诊评估，本质都是「医生席 × 患者 agent × 虚拟 HIS × 评分器」的不同开关组合：
+
+- 📐 [问诊沙盘架构 v0.1](docs/platform/Consultation_Sandbox_Architecture_v0.1.md) —— 完整设计：CaseTruth 病例编译、患者 agent 五步流水线、虚拟 HIS 三级结果解析、auto/judge 双轨评分器，全部机制附代码级参考先例（AgentClinic / AI Hospital / Synthea / HealthBench）
+- 🧪 [P0 黄金案例](docs/platform/p0-golden-case/README.md) —— 2 型糖尿病问诊全量 CaseTruth + 22 条 rubric，含追问松口（second_ask_concede）、目录边界转诊等考点设计
+
 ## 📁 仓库结构
 
 **文档与代码（提交到 Git）**
@@ -44,7 +51,7 @@
 
 | 目录 | 用途 |
 |---|---|
-| `references/` | 克隆的参考项目源码：DSH-AGUI-demo、Camyla、PhysicianBench、HealthAgentBench、AutoMedBench、health-admin-bench |
+| `references/` | 克隆的参考项目源码：问诊沙盘谱系（AgentClinic、AI_Hospital、synthea、simple-evals）与基准（PhysicianBench、HealthAgentBench、AutoMedBench、MedAgentSim、health-admin-bench 等） |
 | `data/` | 数据集与实验数据 |
 | `models/` | 模型权重与 checkpoint |
 | `outputs/` | 实验与生成产物（PDF、视频、图片母版等） |
