@@ -21,3 +21,4 @@
 | 文件 | 类型与角色 | 来源与状态 | 适用场景 |
 |---|---|---|---|
 | `prompts/medical-agent-banner.md` | 生成式图片 prompt 与修订记录 | 本仓库生成（Codex custom provider，`gpt-image-2`）；2026-08-25 | 重建或调整仓库 README 头图（医疗领域 × 智能体封面插画） |
+| `prompts/teaching-wedge-pipeline.md` | 生成式图片 prompt 与修订记录 | 本仓库生成（Codex custom provider，`gpt-image-2`）；2026-08-26 | 重建或调整教学楔子五层管线架构图（`docs/lessons/teaching-wedge-pipeline/`） |
