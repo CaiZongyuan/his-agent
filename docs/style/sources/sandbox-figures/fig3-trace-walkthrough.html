@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="sandbox-figure.css">
+<style>
+  .lane-grid5 { display: grid; grid-template-columns: 88px repeat(5, 1fr); gap: 4px; }
+  .l-head { background: #22303f; color: #fff; font-size: 11.5px; font-weight: 700; text-align: center;
+            padding: 4px 4px; border-radius: 6px; }
+  .l-head small { display: block; font-weight: 400; font-size: 10px; color: #b8c4d2; }
+  .l-role { font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+            text-align: center; border-radius: 6px; padding: 4px 3px; line-height: 1.35; }
+  .cell { border: 1px solid var(--line); border-radius: 6px; padding: 5px 7px; font-size: 11.5px; line-height: 1.42;
+          min-height: 52px; background: #fff; }
+  .cell small { color: var(--sub); font-size: 10.5px; display: block; margin-top: 1px; }
+  .cell.hl-red { background: var(--bg-red); border-color: #e5b7ae; }
+  .cell.hl-amber { background: var(--bg-amber); border-color: #e8d4a4; }
+  .cell.hl-blue { background: var(--bg-blue); border-color: #c9dcf0; }
+  .cell.trace { background: var(--bg-gray); font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; color: #33506e; }
+  .rb { display: inline-block; font-family: "Microsoft YaHei", sans-serif; font-size: 9.5px; font-weight: 700;
+        border-radius: 8px; padding: 0 5px; margin-top: 2px; }
+  .rb.hit { background: var(--green); color: #fff; }
+  .phase-sep { display: flex; align-items: center; gap: 10px; margin: 12px 0 8px; }
+  .phase-sep .ln { flex: 1; height: 1px; background: var(--line); }
+  .phase-sep .t { font-size: 12.5px; font-weight: 700; color: var(--sub); }
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <div class="panel-title-row">
+    <div class="panel-letter">a</div>
+    <div class="panel-title">一场问诊的轨迹走查（P0 golden case · 陈建国 55 岁 · T2DM 控制不佳＋未控制高血压）</div>
+    <div class="panel-sub">每个返回值都出自 CaseTruth；评分信号全部长在动作层</div>
+  </div>
+
+  <!-- ───────── T1–T5 ───────── -->
+  <div class="lane-grid5">
+    <div></div>
+    <div class="l-head">T1 <small>问诊</small></div>
+    <div class="l-head">T2 <small>问诊</small></div>
+    <div class="l-head">T3 <small>问诊</small></div>
+    <div class="l-head">T4 <small>查体 ★</small></div>
+    <div class="l-head">T5 <small>开单</small></div>
+
+    <div class="l-role tint-blue" style="color:var(--blue-dk);">医生席</div>
+    <div class="cell">ASK 多饮多尿</div>
+    <div class="cell">ASK 家族史</div>
+    <div class="cell">ASK「您血压多少？」</div>
+    <div class="cell hl-red"><b>EXAM 生命体征</b><small>高血压唯一检出路径</small></div>
+    <div class="cell">ORDER HbA1c</div>
+
+    <div class="l-role tint-teal" style="color:var(--teal-dk);">患者 agent<br><small style="font-weight:400;">最小权限窗口</small></div>
+    <div class="cell">命中主题，口语化应答要点<small>「渴得厉害…越喝越渴，买冰红茶解渴」</small></div>
+    <div class="cell">「我爸好像也有糖尿病」</div>
+    <div class="cell hl-red">认知层无「测过血压」记忆<small>「好久没量了，不知道」——问不出来是设计，不是缺陷</small></div>
+    <div class="cell">—（检查不经过患者席）</div>
+    <div class="cell">—</div>
+
+    <div class="l-role tint-amber" style="color:#8a5a12;">虚拟 HIS<br><small style="font-weight:400;">三级解析</small></div>
+    <div class="cell" style="border-style:dashed; color:var(--faint);">不涉及</div>
+    <div class="cell" style="border-style:dashed; color:var(--faint);">不涉及</div>
+    <div class="cell" style="border-style:dashed; color:var(--faint);">不涉及</div>
+    <div class="cell hl-red"><b>L1 体征表</b><small>BP 162/96 mmHg ↑（复测 164/94）· P 88 · BMI 27.1</small></div>
+    <div class="cell hl-blue"><b>L1 表内</b><small>9.2% ↑ · TAT 2h · ¥45</small></div>
+
+    <div class="l-role tint-gray" style="color:#475569;">ActionTrace<br><small style="font-weight:400;">评分信号</small></div>
+    <div class="cell trace">ASK(polydipsia_polyuria)<span class="rb hit">R01 ✓</span></div>
+    <div class="cell trace">ASK(family_history)</div>
+    <div class="cell trace">ASK(miss)</div>
+    <div class="cell trace">EXAM(vital_signs)<span class="rb hit">R09 ✓</span></div>
+    <div class="cell trace">ORDER(hba1c)<span class="rb hit">R11 ✓</span></div>
+  </div>
+
+  <div class="phase-sep"><span class="ln"></span><span class="t">问诊 → 查体 → 检查（每一步的类型化事件都成为可判定谓词的输入）</span><span class="ln"></span></div>
+
+  <!-- ───────── T6–T10 ───────── -->
+  <div class="lane-grid5">
+    <div></div>
+    <div class="l-head">T6 <small>开单</small></div>
+    <div class="l-head">T7 <small>开单 · 计划外</small></div>
+    <div class="l-head">T8 <small>追问 ★</small></div>
+    <div class="l-head">T9 <small>诊断处方</small></div>
+    <div class="l-head">T10 <small>结账</small></div>
+
+    <div class="l-role tint-blue" style="color:var(--blue-dk);">医生席</div>
+    <div class="cell">ORDER 血常规</div>
+    <div class="cell hl-blue">ORDER 甲状腺功能<small>消瘦鉴别——合理鉴别，非过度检查</small></div>
+    <div class="cell hl-amber"><b>追问饮酒量（第 2 次）</b><small>前轮首答只拿到「偶尔喝点」</small></div>
+    <div class="cell">DIAGNOSE ＋ PRESCRIBE<small>E11 血糖控制不佳 / I10 高血压；二甲双胍加量＋ARB</small></div>
+    <div class="cell">BILL ＋ SUBMIT</div>
+
+    <div class="l-role tint-teal" style="color:var(--teal-dk);">患者 agent</div>
+    <div class="cell">—</div>
+    <div class="cell">—</div>
+    <div class="cell hl-amber">second_ask_concede 触发<small>「……一天二两白酒吧，喝了十来年了」</small></div>
+    <div class="cell">（流程进入处置，患者席静默）</div>
+    <div class="cell">—</div>
+
+    <div class="l-role tint-amber" style="color:#8a5a12;">虚拟 HIS</div>
+    <div class="cell"><b>L2 基线派生</b><small>WBC 6.8×10⁹/L 正常 · 20min · ¥25</small></div>
+    <div class="cell hl-blue"><b>L1 表内（鉴别设计）</b><small>TSH 2.1 mIU/L 正常 · 4h · ¥180——费用分与鉴别需求联判，单独开不扣分</small></div>
+    <div class="cell" style="border-style:dashed; color:var(--faint);">不涉及</div>
+    <div class="cell">处置空间校验<small>命中 required_elements；若开禁忌药 → 药师审方拦截事件</small></div>
+    <div class="cell">账单合计 ¥375<small>在合理区间 ¥200–600 内</small></div>
+
+    <div class="l-role tint-gray" style="color:#475569;">ActionTrace</div>
+    <div class="cell trace">ORDER(cbc)</div>
+    <div class="cell trace">ORDER(tsh)</div>
+    <div class="cell trace">ASK×2(smoking_alcohol)<span class="rb hit">R08 ✓</span></div>
+    <div class="cell trace">DIAGNOSE/PRESCRIBE<span class="rb hit">R13 R14 R16</span></div>
+    <div class="cell trace">BILL(¥375)/SUBMIT<span class="rb hit">R21 ✓</span></div>
+  </div>
+
+  <div class="box-note" style="margin-top:12px; padding:8px 11px; border:1px dashed var(--line-strong); border-radius:6px;">
+    <b>走查要点</b>　T3＋T4 成对出现：血压「问不出来、只能测出来」——患者认知层（never_knows：自己的血压值）决定问诊路径封死，查体是唯一路径，rubric 用 <span class="tag-code">EXAMINED(vital_signs)</span> 捕捉。T8 是 second_ask_concede：考的不是「问了没有」而是「追问了没有」，单次提问拿到的是假依从/假饮酒量。T7 的 TSH 在表内（设计好的鉴别项，正常），不是 L3 兜底——「计划外」≠「无真值」。评分开始于 SUBMIT 之后：judge 读全量真值＋全量轨迹，逐条判定并引用上图 ActionTrace 中的事件。
+  </div>
+</div>
+
+<div class="fig-footer">
+  <span>数值与费用均为合成教学示意（P0-GC-T2DM-001，未做临床终审）；重放同 seed 逐字节一致</span>
+  <span>问诊沙盘架构 v0.1 · 图 3 · 2026-08 · 教学示意图</span>
+</div>
+
+</body>
+</html>

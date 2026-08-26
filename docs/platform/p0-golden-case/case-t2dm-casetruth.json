@@ -1,0 +1,366 @@
+{
+  "meta": {
+    "scenario_id": "P0-GC-T2DM-001",
+    "title": "2型糖尿病血糖控制不佳（门诊）",
+    "version": "0.1.0-draft",
+    "content_hash": null,
+    "seed": "P0GC1-seed-0001",
+    "created": "2026-08-26",
+    "provenance": "教学工程自构病例：结构参照 AI Hospital 八字段病例（references/AI_Hospital，仅本地），临床常识部分基于 CDS《中国2型糖尿病防治指南（2020年版）》公开结论；未逐字采用任何上游原文，规避再分发风险",
+    "medical_review": "未做临床终审。所有诊断阈值、用药剂量、编码均为教学示意，上线前必须经执业医师逐条审订（见 README 待核验清单）",
+    "designed_for": "P0 golden case：走通 问诊→查体→检查→诊断→处方→结账→评分 全链"
+  },
+
+  "patient": {
+    "identity": {
+      "name": "陈建国",
+      "sex": "男",
+      "age": 55,
+      "occupation": "长途货车司机",
+      "marital": "已婚，一子已成家"
+    },
+    "persona_card": {
+      "character": "急性子，怕麻烦，不喜欢在医院久待",
+      "health_literacy": "低。认为「是药三分毒」，血糖高「不痛不痒就没大事」",
+      "attitude": "这次来是因为口渴得难受、人瘦了心里害怕，想「拿点好药」",
+      "speech_style": "口语化，短句，偶尔不耐烦"
+    },
+    "history_timeline": [
+      { "t": "5年前", "event": "单位体检空腹血糖 7.9 mmol/L，二级医院复诊确诊 2 型糖尿病，开始二甲双胍 0.5g 每日两次" },
+      { "t": "3年前", "event": "自觉「没什么不舒服」，自行把药减为每日一次，未告知医生" },
+      { "t": "1年前", "event": "社区随访查 HbA1c 8.1%，医生提醒控制不佳，患者未在意、方案未调整" },
+      { "t": "2月前", "event": "口渴、多饮逐渐加重，开始每天喝大量含糖饮料「解渴」，体重开始下降" },
+      { "t": "近2月", "event": "体重 84kg → 80.2kg（下降约 4kg）" }
+    ]
+  },
+
+  "encounter": {
+    "setting": "综合医院 内科门诊",
+    "opening_statement": "大夫，我这俩月渴得不行，水一杯接一杯地灌，人还瘦了七八斤。您给开点好药呗，我下午还得跑车。",
+    "time_state_items": [
+      {
+        "id": "TS-1",
+        "trigger": "虚拟时间超过 20 分钟仍未进入处置阶段",
+        "change": "患者开始催促：「大夫，您看快点儿行吗？我下午还有趟长途。」（可出现一次；用于轻度沟通压力考察，不改变任何事实）"
+      }
+    ]
+  },
+
+  "symptom_response_table": {
+    "_comment": "topic 是主题路由器的枚举空间；response_points 用患者语言写定，患者 agent 只做口语化演绎；passive=true 的主题患者绝不主动提及，只有被直接问到才揭示",
+    "topics": {
+      "polydipsia_polyuria": {
+        "name": "多饮多尿",
+        "passive": false,
+        "response_points": [
+          "这两个月渴得厉害，一天要喝好几个暖壶的水，跑长途都得备两瓶",
+          "水喝多尿也多，一晚上要起来两三回，影响睡觉",
+          "最近总觉得渴就买冰红茶、可乐解渴，越喝越渴"
+        ],
+        "denies": [],
+        "avoids": []
+      },
+      "weight_loss": {
+        "name": "体重下降",
+        "passive": false,
+        "response_points": [
+          "两个月瘦了大概八斤，裤腰都松了",
+          "没刻意减肥，饭量跟以前差不多，就是瘦了"
+        ],
+        "denies": ["没觉得哪里疼"],
+        "avoids": []
+      },
+      "fatigue": {
+        "name": "乏力",
+        "passive": false,
+        "response_points": ["容易累，跑车开两三个钟头就得歇", "最近没什么劲儿"],
+        "denies": [],
+        "avoids": []
+      },
+      "foot_numbness": {
+        "name": "足部感觉异常",
+        "passive": true,
+        "_design_note": "核心考点①：患者不认为这是病，绝不主动说。只有被问「手脚有没有发麻、感觉变钝」才揭示",
+        "response_points": [
+          "您这么一问……脚底板是有点发木，像穿了双厚袜子，得有大半年了",
+          "我一直以为是开车坐久了，血脉不通"
+        ],
+        "denies": ["脚上没破过，没烂过"],
+        "avoids": []
+      },
+      "appetite": {
+        "name": "食欲/多食",
+        "passive": false,
+        "_design_note": "干扰项：经典「三多一少」此处不齐全（多食不明显），考察不能靠背综合征",
+        "response_points": ["饭量跟平时差不多，天热了还吃不下多少"],
+        "denies": ["没有特别能吃"],
+        "avoids": []
+      },
+      "vision": {
+        "name": "视力",
+        "passive": false,
+        "response_points": [],
+        "denies": ["眼睛没觉得花，看东西清楚"],
+        "avoids": []
+      },
+      "hypoglycemia_screen": {
+        "name": "低血糖症状",
+        "passive": true,
+        "_design_note": "安全筛查考点：调降糖方案前必问",
+        "response_points": [],
+        "denies": ["没有过心慌、出冷汗、手抖、饿得发慌那种时候"],
+        "avoids": []
+      },
+      "medication_adherence": {
+        "name": "用药与依从性",
+        "passive": false,
+        "response_points": [
+          "吃的是二甲双胍，一天两次，白药片",
+          "……说实话老忘。跑长途吃饭没点儿，药就忘了",
+          "我寻思血糖又不难受，少吃一顿没啥"
+        ],
+        "denies": [],
+        "avoids": [],
+        "second_ask_concede": "第一次问答「基本都按时吃」；追问具体（一天几片/漏了怎么办）后松口承认经常漏服"
+      },
+      "family_history": {
+        "name": "家族史",
+        "passive": false,
+        "response_points": ["我父亲好像也有糖尿病，晚年打的胰岛素", "母亲血压高不高不知道，她走得早"],
+        "denies": ["兄弟姐妹没听说有"],
+        "avoids": []
+      },
+      "lifestyle_diet": {
+        "name": "饮食运动",
+        "passive": false,
+        "response_points": [
+          "跑车吃饭没规律，服务区快餐、面食为主",
+          "渴了就喝冰红茶可乐，一天两三瓶",
+          "开车一坐一天，基本不锻炼"
+        ],
+        "denies": [],
+        "avoids": []
+      },
+      "smoking_alcohol": {
+        "name": "吸烟饮酒",
+        "passive": false,
+        "_design_note": "隐瞒考点：第一次问答「偶尔喝点」；医生追问频率/量后第二次松口",
+        "response_points": ["烟抽了二十来年，一天小半包"],
+        "denies": [],
+        "avoids": [
+          { "question_pattern": "初次询问饮酒", "response": "就应酬时候喝点，不多" },
+          { "question_pattern": "追问具体频率/量（每天喝吗/喝多少）", "response": "……一天二两白酒吧，喝了十来年了，哎呀这个也要管啊？" }
+        ]
+      },
+      "past_history": {
+        "name": "既往史",
+        "passive": false,
+        "_design_note": "关键设定：患者不知道自己有高血压——从未测过血压。既往史只认糖尿病",
+        "response_points": ["就是五年前查出的糖尿病", "别的没有，肝炎结核都没有，没开过刀"],
+        "denies": ["没听说过高血压", "从来没量过血压", "药物食物都不过敏"],
+        "avoids": []
+      },
+      "care_memory": {
+        "name": "就医与检查记忆",
+        "passive": false,
+        "response_points": [
+          "去年在社区查过一次血糖，大夫说8点几，说控制得不好",
+          "报告单早不知道扔哪儿了",
+          "没查过眼睛，脚也没查过"
+        ],
+        "denies": ["没打过胰岛素"],
+        "avoids": []
+      },
+      "ros_negative": {
+        "name": "系统回顾-阴性",
+        "passive": false,
+        "response_points": [],
+        "denies": [
+          "不发烧", "不咳嗽", "肚子不疼不拉", "尿尿不疼不急",
+          "头不晕不疼", "胸口不闷，心不慌", "睡觉打不打呼噜没注意过"
+        ],
+        "avoids": []
+      }
+    }
+  },
+
+  "exam_findings": {
+    "_comment": "L1 表内项。查体动作命中即返回 finding；未列出的查体项走 L2/L3",
+    "vital_signs": {
+      "name": "生命体征",
+      "finding": "T 36.5℃，P 88 次/分，R 16 次/分，BP 162/96 mmHg（休息5分钟后复测 164/94）",
+      "abnormal": ["血压 2 级升高（160–179/100–109 区间，取就高原则）"],
+      "_design_note": "核心考点②：患者从未测过血压，问诊问不出，必须查体"
+    },
+    "general": { "name": "一般情况", "finding": "神志清，体型肥胖（BMI 27.1），查体合作，略显着急", "abnormal": [] },
+    "foot_exam": {
+      "name": "足部检查（视诊+触诊+针刺觉/尼龙丝）",
+      "finding": "双足皮肤完整无破溃，皮温正常，足背动脉搏动对称存在；双足底针刺觉减退，10g 尼龙丝检查双足背多点感觉减弱",
+      "abnormal": ["双足远端对称性感觉减退——符合糖尿病周围神经病变表现"],
+      "_design_note": "阳性体征与 foot_numbness 主题呼应：问诊或查体任一路径都能到达，双路径都做=满分路径"
+    },
+    "heart_lungs": { "name": "心肺听诊", "finding": "心律齐，未闻及杂音；双肺呼吸音清", "abnormal": [] },
+    "abdomen": { "name": "腹部查体", "finding": "腹软无压痛，肝脾未及", "abnormal": [] },
+    "edema": { "name": "双下肢水肿", "finding": "双下肢无水肿", "abnormal": [] }
+  },
+
+  "test_order_table": {
+    "_comment": "L1 表内项。fee 为合成本院价目（非真实价格）；critical=true 触发危急值流程",
+    "random_glucose": {
+      "name": "随机指尖血糖",
+      "result": { "value": 13.8, "unit": "mmol/L", "ref": "随机 <11.1", "flag": "H" },
+      "tat_minutes": 1, "fee_cny": 5, "critical": false,
+      "report_template": "指尖血糖 {value} mmol/L（随机参考 <11.1 mmol/L，升高）"
+    },
+    "hba1c": {
+      "name": "糖化血红蛋白（HbA1c）",
+      "result": { "value": 9.2, "unit": "%", "ref": "4.0–6.0", "flag": "H" },
+      "tat_minutes": 120, "fee_cny": 45, "critical": false,
+      "report_template": "糖化血红蛋白 {value}%（参考 4.0–6.0%，明显升高，提示近8–12周血糖控制不佳）"
+    },
+    "urinalysis": {
+      "name": "尿常规",
+      "result": { "value": "GLU 3+；KET 阴性；PRO 阴性；WBC 0/μL", "ref": "均阴性", "flag": "GLU 阳性" },
+      "tat_minutes": 30, "fee_cny": 15, "critical": false,
+      "report_template": "尿糖 3+，酮体阴性，蛋白阴性",
+      "_design_note": "KET 阴性用于排除酮症——本例非急症"
+    },
+    "renal_function": {
+      "name": "肾功能",
+      "result": { "value": "Cr 82 μmol/L；eGFR 89 mL/min/1.73m²", "ref": "eGFR ≥90", "flag": "大致正常" },
+      "tat_minutes": 60, "fee_cny": 30, "critical": false,
+      "report_template": "肌酐 {value}；eGFR 89（轻度下降临界，二甲双胍可继续使用）",
+      "_design_note": "处方安全考点：加量前评估"
+    },
+    "liver_function": {
+      "name": "肝功能",
+      "result": { "value": "ALT 28 U/L；AST 24 U/L", "ref": "ALT 9–50", "flag": "正常" },
+      "tat_minutes": 60, "fee_cny": 40, "critical": false,
+      "report_template": "肝酶正常"
+    },
+    "lipid_panel": {
+      "name": "血脂四项",
+      "result": { "value": "TC 5.8；LDL-C 3.6；HDL-C 1.0；TG 2.4 mmol/L", "ref": "LDL-C <2.6（糖尿病人群目标）", "flag": "LDL-C 升高" },
+      "tat_minutes": 60, "fee_cny": 35, "critical": false,
+      "report_template": "总胆固醇 5.8，LDL-C 3.6（高于糖尿病人群 <2.6 目标）"
+    },
+    "tsh": {
+      "name": "甲状腺功能（TSH）",
+      "result": { "value": 2.1, "unit": "mIU/L", "ref": "0.55–4.78", "flag": "正常" },
+      "tat_minutes": 240, "fee_cny": 180, "critical": false,
+      "report_template": "TSH {value} mIU/L（正常范围）",
+      "_design_note": "鉴别设计：消瘦需鉴别甲亢。表内正常（设计好的鉴别项，不是 L3 兜底）。费用较高——费用分条款需与鉴别需求联判"
+    },
+    "ecg": {
+      "name": "心电图",
+      "result": { "value": "窦性心律，HR 88 bpm，大致正常心电图", "ref": "—", "flag": "正常" },
+      "tat_minutes": 20, "fee_cny": 25, "critical": false,
+      "report_template": "窦性心律，大致正常"
+    },
+    "fundus_screening": {
+      "name": "眼底检查（散瞳眼底照相等）",
+      "result": { "value": "本院门诊未开展", "ref": "—", "flag": "目录边界" },
+      "tat_minutes": 0, "fee_cny": 0, "critical": false,
+      "report_template": "【系统提示】眼底专科检查本院门诊未开展，可转诊眼科或预约眼科会诊",
+      "_design_note": "目录边界考察：正确行为是「建议/安排眼底筛查（转诊）」而非放弃"
+    },
+    "ogtt": {
+      "name": "口服葡萄糖耐量试验（OGTT）",
+      "result": { "value": "已确诊糖尿病患者不建议常规行 OGTT", "ref": "—", "flag": "无指征提示" },
+      "tat_minutes": 180, "fee_cny": 60, "critical": false,
+      "report_template": "【系统提示】该患者已有糖尿病病史且本次随机血糖 13.8 mmol/L，OGTT 无指征",
+      "_design_note": "过度检查考题：已确诊者开 OGTT 属无指征检查"
+    }
+  },
+
+  "physiology_baselines": {
+    "_comment": "L2 派生层：医生开表外常规项时按此基线 ± 场景种子噪声生成。Synthea vital_sign 机制先例见架构文档 §4.3",
+    "vitals": { "height_cm": 172, "weight_kg": 80.2, "bmi": 27.1, "bp_baseline": "162/96（未控制高血压状态）", "hr_baseline": 88 },
+    "routine_labs": {
+      "cbc": "WBC 6.8×10⁹/L，HGB 152 g/L，PLT 235×10⁹/L（大致正常）",
+      "electrolytes": "K⁺ 4.1，Na⁺ 140，Cl⁻ 102 mmol/L（正常）",
+      "uric_acid": "410 μmol/L（正常高值）",
+      "coagulation": "PT/INR、APTT 正常"
+    },
+    "default_normal_policy": "L3 兜底：表外且基线未覆盖的项目 → 该年龄性别正常参考分布采样（场景种子固定）；轨迹记 unmodeled_item 标记"
+  },
+
+  "patient_knowledge": {
+    "_comment": "患者脑中的内容——患者 agent 事实窗口的唯一来源。认知层没有的信息=患者盲区",
+    "told_diagnoses": ["2型糖尿病（5年前确诊时被告知）", "血糖控制不好（1年前社区医生说过「8点几，控制得不好」，未在意）"],
+    "med_memory": "白药片二甲双胍，医生说一天两次；自己经常漏服且3年前自行减量——减量这件事第一次问不会说，追问后才承认",
+    "lifestyle": {
+      "smoking": "20余年，约半包/日，如实承认",
+      "alcohol": { "actual": "白酒约每日2两，十余年", "admitted_on_first_ask": "应酬时候喝点", "concede_on_second_ask": true }
+    },
+    "never_knows": ["自己的血压值（从未测量）", "任何血糖数值细节（除「8点几」这一模糊记忆）", "糖化血红蛋白概念", "「周围神经病变」这个词"],
+    "health_literacy": "低：说「血糖高」不说数值，不知道 HbA1c，认为「不难受就不用天天吃药」",
+    "care_memory": "去年社区随访查过一次血糖；从未查过眼底和足部；无住院史"
+  },
+
+  "diagnosis_space": {
+    "primary": {
+      "dx": "2型糖尿病 血糖控制不佳",
+      "icd10_hint": "E11.x（具体编码待核验国家临床版 2.0）",
+      "required_evidence": "糖尿病史 + 多饮多尿消瘦加重 + 随机血糖 13.8 / HbA1c 9.2"
+    },
+    "comorbidities_should_detect": [
+      { "dx": "高血压2级（首次发现）", "icd10_hint": "I10.x", "route": "唯一路径=查体测血压（问不出来）" },
+      { "dx": "2型糖尿病周围神经病变", "icd10_hint": "E11.4xx 待核验", "route": "问诊足麻 或 足部查体，任一路径可得；纳入诊断或建议专科评估均认可" }
+    ],
+    "differentials": [
+      { "dx": "甲状腺功能亢进（消瘦鉴别）", "expected_action": "开 TSH 排除，或在最终病历中书面解释消瘦归因于血糖失控", "truth": "TSH 2.1 正常，排除" },
+      { "dx": "药源性/其他消耗性疾病", "expected_action": "无指征时不需套餐排查；若开肿瘤全套等大套餐记过度检查" }
+    ],
+    "traps": [
+      "「三多一少」不齐全（无多食）而被带偏排除糖尿病",
+      "不测血压 → 漏诊高血压2级",
+      "足麻被动主题：不主动问就漏掉神经病变线索",
+      "患者要「好药」：仅换药/加药而不处理依从性与含糖饮料，治标不治本"
+    ]
+  },
+
+  "management_space": {
+    "required_elements": [
+      "降糖方案优化：二甲双胍规范足量使用（含依从性核实）或加用第二种口服降糖药或起始胰岛素——三者均接受，但必须包含「解释为什么现在的方案不够」",
+      "依从性与生活方式教育：明确指出漏服药问题 + 停含糖饮料 + 规律进餐；教育内容须患者能懂的语言",
+      "血压管理：发现高血压2级后应启动药物治疗（糖尿病人群2级高血压）或给出明确的两周内复测-启动计划，仅说「观察观察」不认可",
+      "处方安全：调整降糖方案前核对肝肾功能（本次开单或引用1年内既往结果均可）"
+    ],
+    "acceptable_options": [
+      "二甲双胍加量至 1.0g bid（肾功能允许）",
+      "加用 SGLT-2 抑制剂（如恩格列净 10mg qd，兼有血压/体重获益）或 DPP-4 抑制剂",
+      "启动基础胰岛素（HbA1c 9.2% 时指南允许）",
+      "降压药：ARB/ACEI 类优先（糖尿病人群）",
+      "阿司匹林：暂不启动（一级预防需评估，本例不作为必需项也不作为错误）"
+    ],
+    "contraindicated_or_failing": [
+      "只换「好药」不做依从性教育——直接判过程失败项",
+      "对 eGFR<45 患者二甲双胍禁用情形未核对（本例 eGFR 89，但跳过核对流程记安全缺陷）",
+      "开 OGTT（已确诊无指征）",
+      "漏开/漏建议眼底筛查与足部护理"
+    ],
+    "follow_up": "3 个月复查 HbA1c 与血压；眼底检查转诊安排；足部护理教育（每日检查双足、鞋子检查）"
+  },
+
+  "cost_baseline": {
+    "reference_path": "随机血糖5 + 尿常规15 + HbA1c 45 + 肾功30 + 肝功40 + 血脂35 + 心电图25 = ¥195；加 TSH(180) 用于消瘦鉴别 = ¥375",
+    "reasonable_range_cny": [200, 600],
+    "over_investigation_threshold_cny": 1000,
+    "note": "费用分条款必须与鉴别需求联判：TSH 单独开出不扣分（合理鉴别）；开出肿瘤标志物全套/PET 等无指征项目则记过度检查"
+  },
+
+  "reveal_policy": {
+    "global_defaults": {
+      "symptom_topics": "问诊后按主题揭示（passive 主题需直接相关提问）",
+      "exam_findings": "查体后揭示（按查体项）",
+      "test_results": "开单后按 TAT 揭示",
+      "truth_layer": "诊断空间/处置空间/费用基准：仅 evaluator 可见，任何运行时不揭示"
+    },
+    "overrides": [
+      { "item": "medication_adherence 减量史", "policy": "第二次追问后揭示（second_ask_concede）" },
+      { "item": "smoking_alcohol 实际饮酒量", "policy": "第二次追问后揭示（second_ask_concede）" },
+      { "item": "TS-1 时间状态", "policy": "虚拟时间 >20 分钟触发一次" }
+    ]
+  }
+}

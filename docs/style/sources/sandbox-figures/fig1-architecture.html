@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="sandbox-figure.css">
+<style>
+  .stage { position: relative; padding: 0 128px 0 118px; } /* 左右留出双轨通道 */
+  .band { border: 1px solid var(--line); border-radius: 10px; background: #fff; padding: 12px 16px 13px; }
+  .band-tag { display: flex; align-items: baseline; gap: 10px; margin-bottom: 9px; }
+  .band-tag .name { font-size: 15.5px; font-weight: 700; color: #22303f; }
+  .band-tag .range { font-size: 11.5px; color: var(--faint); }
+  /* 左右两条纵向通道 */
+  .rail { position: absolute; top: 6px; bottom: 6px; width: 96px; border-radius: 10px; padding: 10px 8px;
+          display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+  .rail-truth { right: 8px; border: 2px dashed var(--red); background: #fdf6f4; }
+  .rail-loop  { left: 8px;  border: 2px dashed var(--line-strong); background: #fafbfc; }
+  .rail .t { writing-mode: vertical-lr; letter-spacing: 3px; font-size: 13.5px; font-weight: 700; }
+  .rail-truth .t { color: var(--red-dk); }
+  .rail-loop .t { color: #475569; }
+  .rail .d { writing-mode: vertical-lr; font-size: 11px; color: var(--sub); letter-spacing: 1px; }
+  .down-join { display: flex; justify-content: center; align-items: center; height: 26px; }
+  .down-join::before { content: ""; width: 0; height: 0; border-left: 9px solid transparent; border-right: 9px solid transparent; border-top: 11px solid #9fb0c0; }
+  .cbox { flex: 1; min-width: 0; }
+  .src-chip { display: inline-block; font-size: 11.5px; border: 1px solid var(--line-strong); border-radius: 6px; padding: 3px 8px; margin: 2px 3px 2px 0; background: #fff; }
+</style>
+</head>
+<body>
+
+<!-- ══════════ 图 1 总体架构：三段流水线 + 双侧通道（真值通道 / 反馈回流） ══════════ -->
+<div class="stage">
+
+  <!-- 真值通道（右侧红线） -->
+  <div class="rail rail-truth">
+    <div class="t">真值通道 · 仅评委可见</div>
+    <div class="d">铁律② CaseTruth 绕过运行时直达评分器，患者 agent 上下文永不包含全文</div>
+  </div>
+  <!-- 反馈回流（左侧灰线） -->
+  <div class="rail rail-loop">
+    <div class="t">反馈回流</div>
+    <div class="d">人工推翻→rubric 修订；高分轨迹→经验召回</div>
+  </div>
+
+  <!-- ── 离线 ── -->
+  <div class="band tint-blue" style="background:#f7fafe;">
+    <div class="band-tag"><span class="name">离线 · 数据工厂与病例编译</span><span class="range">C1 → C2，产物不可变（Scenario + hash）</span></div>
+    <div class="row">
+      <div class="box cbox" style="flex:0.82;">
+        <div class="box-title">C1 数据工厂（三源互补）</div>
+        <div style="margin-top:4px;">
+          <span class="src-chip"><b>Synthea</b> 一生病史骨架</span>
+          <span class="src-chip"><b>AI Hospital</b> 中文病例八字段</span>
+          <span class="src-chip"><b>AgentClinic</b> 难度与偏置设计</span>
+        </div>
+        <div class="box-note" style="margin-top:5px;">纵向真实性 × 中文文书结构 × 难度工程，单源不完整</div>
+      </div>
+      <div class="flow-right grow" style="align-self:center;"></div>
+      <div class="box cbox grow tint-blue">
+        <div class="box-title">C2 病例编译器</div>
+        <div class="box-note">CaseTruth schema：症状应答表 · 查体体征表 · 检查结果表 · <b>患者认知层</b> · 生理基线集 · 诊断/处置空间 · 费用基准<br>
+        Rubric 半自动派生（诊断依据→过程分种子）＋ RevealPolicy → 不可变 Scenario</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="down-join"></div>
+
+  <!-- ── 在线 ── -->
+  <div class="band" style="border-color:#c3e0da;">
+    <div class="band-tag"><span class="name" style="color:var(--teal-dk);">在线 · 沙盘运行时</span><span class="range">C3 Encounter 引擎 + C4 轨迹记录器</span></div>
+    <div class="row">
+      <div class="node c-blue cbox" style="flex:0.9;">
+        <div class="box-title">医生席</div>
+        <div class="box-note">医学生（Web 工作台·CPOE 菜单）<br>agent 学生（同一工具接口·强弱双档）</div>
+      </div>
+      <div class="flow-right grow" style="align-self:center;"></div>
+      <div class="node c-teal cbox grow tint-teal">
+        <div class="box-title">患者 agent <span class="chip llm">LLM·仅口语化</span></div>
+        <div class="box-note">最小权限窗口 · 五步流水线（路由→装配→生成→校验→日志）</div>
+        <div style="margin-top:6px;"><span class="chip red">铁律① 只口语化，不决定事实</span></div>
+      </div>
+      <div class="flow-right grow" style="align-self:center;"></div>
+      <div class="node c-amber cbox" style="flex:1.05;">
+        <div class="box-title">虚拟 HIS <span class="chip code">确定性引擎</span></div>
+        <div class="box-note">三级结果解析（L1 表内 / L2 派生 / L3 默认正常）· 四件套（结果·报告·TAT·费用）· 危急值打断</div>
+      </div>
+    </div>
+    <div class="box tint-gray" style="margin-top:10px;">
+      <div class="box-title" style="font-size:13.5px;">C4 轨迹记录器 — 三层日志 <span class="chip red" style="margin-left:6px;">铁律③ append-only · 重放可复现</span></div>
+      <div class="box-note">对话层（逐轮原文）｜动作层 ActionTrace（ASK/EXAM/ORDER/DIAGNOSE/PRESCRIBE/BILL 类型化事件）｜状态层（已揭示集 R · HIS 状态 H 增量 → 反事实判定依据）</div>
+    </div>
+  </div>
+
+  <div class="down-join"></div>
+
+  <!-- ── 事后 ── -->
+  <div class="band" style="border-color:#e5b7ae; background:#fefaf9;">
+    <div class="band-tag"><span class="name" style="color:var(--red-dk);">事后 · 评分与沉淀</span><span class="range">终止后一次性执行，读全量真值 + 全量轨迹</span></div>
+    <div class="row">
+      <div class="node c-red cbox grow" style="flex:1.15;">
+        <div class="box-title">C5 评分器（双轨）</div>
+        <div class="box-note"><b>auto 轨</b>：轨迹谓词纯函数（无 LLM）　<b>judge 轨</b>：一条款一次 LLM 调用·带引用<br>
+        聚合 → 信度三道门（重复评分 / 人工抽查 / 强弱区分）→ 分类分报告</div>
+      </div>
+      <div class="flow-right grow" style="align-self:center;"></div>
+      <div class="node c-green cbox" style="flex:0.9;">
+        <div class="box-title">C6 沉淀层</div>
+        <div class="box-note">经验库（高分轨迹→in-context 范例）<br>错例库（坏模式阻断）· 校准数据</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 四部署开关矩阵 ── -->
+<div class="panel" style="margin-top:18px;">
+  <div class="panel-title-row">
+    <div class="panel-letter">a</div>
+    <div class="panel-title">同一引擎的四种部署 = 开关组合</div>
+    <div class="panel-sub">差异只在：谁坐医生席 · 评委何时介入 · 真值给谁 · 输出到哪</div>
+  </div>
+  <table class="matrix">
+    <tr><th style="width:12%;">部署形态</th><th style="width:22%;">医生席</th><th style="width:22%;">评委</th><th style="width:22%;">真值角色</th><th>输出</th></tr>
+    <tr><td>辅助问诊</td><td>真医生 ＋ copilot</td><td>事中提示，不评分</td><td>仅驱动患者/HIS，不做评判</td><td>实时辅助建议</td></tr>
+    <tr><td>虚拟问诊</td><td>练习者（人或 agent）</td><td>无</td><td>仅驱动模拟</td><td>对话与体验</td></tr>
+    <tr><td>问诊教学</td><td>医学生</td><td>事后 judge ＋ 反馈</td><td>逐条判定＋引用式反馈</td><td>学习反馈报告</td></tr>
+    <tr><td>问诊评估</td><td>被评 agent</td><td>事后 judge</td><td>全班同一 CaseTruth，可比</td><td>分类分（给第三方）</td></tr>
+  </table>
+</div>
+
+<div class="fig-footer">
+  <span>三条铁律：① LLM 只口语化不决定事实　② 真值仅评委可见（右侧通道）　③ 轨迹 append-only 不可变</span>
+  <span>问诊沙盘架构 v0.1 · 图 1 · 2026-08 · 教学示意图</span>
+</div>
+
+</body>
+</html>

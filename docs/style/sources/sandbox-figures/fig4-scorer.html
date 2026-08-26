@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="sandbox-figure.css">
+<style>
+  .rail-auto, .rail-judge { border-radius: 10px; padding: 10px 12px; }
+  .rail-auto { background: var(--bg-gray); border: 1px solid #dfe4ea; }
+  .rail-judge { background: var(--bg-teal); border: 1px solid #c3e0da; }
+  .rail-name { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+  .pred { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; background: #fff; border: 1px solid var(--line);
+          border-radius: 5px; padding: 2px 7px; display: inline-block; margin: 2px 3px 2px 0; color: #33506e; }
+  .vbars { display: flex; flex-direction: column; gap: 5px; margin-top: 6px; }
+  .vbar-row { display: flex; align-items: center; gap: 7px; font-size: 11.5px; }
+  .vbar-row .lbl { width: 40px; text-align: right; color: var(--sub); flex: none; }
+  .vbar-row .bar { height: 13px; border-radius: 3px; }
+  .vbar-row .num { color: var(--faint); font-size: 10.5px; }
+  .prompt-block { background: #fff; border: 1px dashed var(--teal); border-radius: 6px; padding: 6px 9px; font-size: 11.5px; line-height: 1.55; color: #33414f; }
+  .gate { flex: 1; min-width: 0; }
+</style>
+</head>
+<body>
+
+<!-- ══════════ a · 双轨判定 ══════════ -->
+<div class="panel">
+  <div class="panel-title-row">
+    <div class="panel-letter">a</div>
+    <div class="panel-title">双轨判定：auto 谓词为主，judge 兜底（本例 16 : 6）</div>
+    <div class="panel-sub">凡能归约为「轨迹中存在某类型化事件」的条款都走代码</div>
+  </div>
+
+  <div class="row" style="align-items:stretch;">
+    <!-- 输入 -->
+    <div class="col" style="flex:0.2;">
+      <div class="node c-red tint-red grow"><div class="box-title">CaseTruth 全量</div><div class="box-note">含运行时从未揭示的层（诊断空间 · 处置空间）</div></div>
+      <div class="node c-blue grow" style="margin-top:8px;"><div class="box-title">三层轨迹</div><div class="box-note">对话层 · 动作层 ActionTrace · 状态层</div></div>
+      <div class="node c-blue" style="margin-top:8px;"><div class="box-title">最终病历</div><div class="box-note">结构化答卷（SUBMIT 时锁定）</div></div>
+    </div>
+
+    <div class="flow-right" style="align-self:center;"></div>
+
+    <!-- auto 轨 -->
+    <div class="rail-auto" style="flex:0.4;">
+      <div class="rail-name" style="color:#475569;">auto 轨 <span class="chip code">纯代码 · 零噪声 · 可单测</span></div>
+      <div class="box-note" style="margin-bottom:4px;">谓词 = ActionTrace 上的纯函数（11 个）：</div>
+      <div>
+        <span class="pred">ASKED(主题)</span><span class="pred">ASKED_AFTER_FOLLOWUP</span><span class="pred">EXAMINED(项)</span><span class="pred">ORDERED(项)</span><span class="pred">ORDERED_BEFORE(项,PRESCRIBE)</span><span class="pred">NOT_ORDERED</span><span class="pred">DIAGNOSED(码)</span><span class="pred">PRESCRIBED(类)</span><span class="pred">DOCUMENTED(字段)</span><span class="pred">TOTAL_FEE(区间)</span><span class="pred">TRACE(片段)</span>
+      </div>
+      <div class="box tint-blue" style="margin-top:7px;">
+        <div class="box-title" style="font-size:12.5px;">实例 · R04（依从性深挖，auto）</div>
+        <div class="box-note"><span class="tag-code">ASKED_AFTER_FOLLOWUP(medication_adherence)</span> —— 该主题在追问（同主题 ≥2 次 ASK）后才命中；单次提问拿到的是假依从</div>
+      </div>
+    </div>
+
+    <div class="flow-right" style="align-self:center;"></div>
+
+    <!-- judge 轨 -->
+    <div class="rail-judge grow">
+      <div class="rail-name" style="color:var(--teal-dk);">judge 轨 <span class="chip llm">一条款 · 一次 LLM 调用</span></div>
+      <div class="prompt-block">
+        输入：CaseTruth ＋ 三层轨迹 ＋ 病历 ＋ <b>仅一条</b>条款（R15–R20）<br>
+        输出 JSON：<b>verdict</b> ∈ 成立 / 不成立 / 不适用 / 证据不足<br>
+        　　　　　<b>citations</b>［layer + ref + ≤50 字原文摘录］——无引用的成立判定视为证据不足<br>
+        　　　　　rationale 先行，verdict 最后（先引用后结论）<br>
+        <span style="color:var(--faint);">temperature 0 · 同批条款互不可见 · 解析失败重试 1 次后降级进人工队列</span>
+      </div>
+      <div class="box" style="margin-top:7px; background:#fff;">
+        <div class="box-title" style="font-size:12.5px;">实例 · R19（通俗解释，judge）</div>
+        <div class="box-note">「医生是否用患者能懂的语言解释病情与调整原因（如『糖化血红蛋白』翻译成大白话）？引用具体轮次原文」——语义充分性无法归约为类型化事件，只能语义判定</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 聚合 -->
+  <div class="row" style="margin-top:12px; align-items:stretch;">
+    <div class="node c-blue grow" style="flex:1.5;">
+      <div class="box-title">聚合（不合成单一总分）</div>
+      <div class="box-note">类内得分 = Σ(成立条款权重) / Σ(适用条款权重) × 100；NOT_APPLICABLE 从分母剔除；负分条款成立即扣（HealthBench 聚合公式）</div>
+      <div class="vbars">
+        <div class="vbar-row"><span class="lbl">过程</span><div class="bar" style="width:198px; background:var(--blue);"></div><span class="num">权重和 44 · 12 条</span></div>
+        <div class="vbar-row"><span class="lbl">结果</span><div class="bar" style="width:162px; background:#5a8fd6;"></div><span class="num">权重和 36 · 6 条</span></div>
+        <div class="vbar-row"><span class="lbl">沟通</span><div class="bar" style="width:68px; background:var(--teal);"></div><span class="num">权重和 15 · 2 条</span></div>
+        <div class="vbar-row"><span class="lbl">费用</span><div class="bar" style="width:45px; background:var(--amber);"></div><span class="num">权重和 10 · 2 条</span></div>
+      </div>
+    </div>
+    <div class="node c-amber tint-amber" style="flex:1;">
+      <div class="box-title">depends_on：依赖显式化</div>
+      <div class="box-note">R14「诊断高血压 2 级」depends_on R09「测了血压」——没测就不可能诊断。依赖未打通<b>仍判定并在报告标注「路径未打通」</b>：过程分低＋结果分低＋依赖未打通＝指出学员具体缺陷路径（漏查体→漏诊断），这正是教学反馈要的信息</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ b · 信度三道门 ══════════ -->
+<div class="panel">
+  <div class="panel-title-row">
+    <div class="panel-letter">b</div>
+    <div class="panel-title">信度三道门：分数出厂前置</div>
+    <div class="panel-sub">分数本身也要被评——不过门的 rubric 不上线（阈值为初设【工程假设】，P0 校准后定稿）</div>
+  </div>
+  <div class="row" style="align-items:stretch;">
+    <div class="node c-gray tint-gray" style="flex:0.16; align-self:center; text-align:center;">
+      <div class="box-title">判定结果</div><div class="box-note">22 条 verdicts</div>
+    </div>
+    <div class="flow-right" style="align-self:center;"></div>
+    <div class="gate node c-teal"><div class="box-title">门 1 · 重复评分 <span class="chip blue">量评委噪声</span></div>
+      <div class="box-note">同轨迹 judge 轨 3 次独立判定；全一致率 &lt; 0.9 的条款进修订队列——先怀疑条款歧义，再怀疑评委模型</div></div>
+    <div class="flow-right" style="align-self:center;"></div>
+    <div class="gate node c-teal"><div class="box-title">门 2 · 人工抽查 <span class="chip blue">量评委偏置</span></div>
+      <div class="box-note">分层抽 20%（每类 ≥5 条，成立/不成立各半）；人工只核对 citation 是否支撑 verdict；一致率 ≥ 0.8 出厂</div></div>
+    <div class="flow-right" style="align-self:center;"></div>
+    <div class="gate node c-teal"><div class="box-title">门 3 · 强弱区分 <span class="chip blue">量整套仪器</span></div>
+      <div class="box-note">强弱双档 agent × 同病例 × n 次；分类分均值差 bootstrap CI 不重叠才算显著</div></div>
+    <div class="flow-right" style="align-self:center;"></div>
+    <div class="node c-green tint-green" style="flex:0.3;">
+      <div class="box-title">出厂报告</div>
+      <div class="box-note">未成立条款置顶；附<b>仪器铭牌</b>：grader 版本 · rubric 版本 · 场景 seed · 各门信度数据——分数脱离铭牌不可比</div>
+    </div>
+  </div>
+  <div class="box-note" style="margin-top:10px; padding:7px 10px; border:1px dashed var(--line-strong); border-radius:6px;">
+    人工推翻的判定 → 回流 C2 修订 rubric 条款（评分校准回路）。工程形态参照（代码级核验 <span class="tag-code">references/simple-evals/healthbench_eval.py</span>）：一条款一次调用 · 布尔判定＋权重聚合 · bootstrap 方差 · 判 false 置顶 · grader 钉版本；反例参照：AI Hospital 评估脚本单次调用五维 A–D 印象等级（无引用、无法定位轮次）
+  </div>
+</div>
+
+<div class="fig-footer">
+  <span>评分是仪器不是印象：可程序化的尽程序化，语义判定的必须带引用</span>
+  <span>问诊沙盘架构 v0.1 · 图 4 · 2026-08 · 教学示意图</span>
+</div>
+
+</body>
+</html>

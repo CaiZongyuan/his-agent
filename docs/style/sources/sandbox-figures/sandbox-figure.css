@@ -1,0 +1,110 @@
+/* 问诊沙盘架构图 · 共享设计系统（Nature 级科研配图规范）
+ * 渲染：scripts/render-html-figure.mjs（Chromium @2x，逻辑宽 1280px）
+ * 字号契约：最小 12px（@2x 缩印 183mm 时 ≈4.3pt），正文 13.5px（≈5pt）
+ * 色彩契约：中性灰阶 + 蓝(结构)/青(引擎)/琥珀(时间·费用)/红(铁律·危急值·失败)/绿(成立)
+ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --ink: #17222e; --sub: #5b6b7b; --faint: #8a97a6;
+  --line: #dce3ea; --line-strong: #b9c4cf;
+  --bg-blue: #edf3fa; --blue: #2c6fbb; --blue-dk: #1f5490;
+  --bg-teal: #eaf4f1; --teal: #0e7c6f; --teal-dk: #0a5f55;
+  --bg-amber: #fbf3e2; --amber: #b7791f;
+  --bg-red: #fbece7; --red: #c4453c; --red-dk: #a3352d;
+  --bg-green: #ebf5ee; --green: #2f855a;
+  --bg-gray: #f4f6f9; --gray: #64748b;
+}
+
+body {
+  width: 1280px;
+  font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+  color: var(--ink);
+  background: #ffffff;
+  font-size: 13.5px; line-height: 1.5;
+  padding: 40px 44px 30px;
+}
+
+/* ---------- 面板 ---------- */
+.panel { border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px 16px; background: #fff; }
+.panel + .panel, .panel + .row, .row + .panel { margin-top: 18px; }
+.panel-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.panel-letter {
+  width: 24px; height: 24px; border-radius: 5px; background: #22303f; color: #fff;
+  font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center;
+  font-family: Georgia, serif; flex: none;
+}
+.panel-title { font-size: 20px; font-weight: 700; letter-spacing: 0.2px; }
+.panel-sub { font-size: 12.5px; color: var(--sub); margin-left: auto; text-align: right; max-width: 46%; }
+
+/* ---------- 盒子 ---------- */
+.box { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: #fff; }
+.box-title { font-size: 14.5px; font-weight: 650; margin-bottom: 3px; }
+.box-note { font-size: 12px; color: var(--sub); line-height: 1.45; }
+.tint-blue { background: var(--bg-blue); border-color: #c9dcf0; }
+.tint-teal { background: var(--bg-teal); border-color: #c3e0da; }
+.tint-amber { background: var(--bg-amber); border-color: #ecd9ae; }
+.tint-red { background: var(--bg-red); border-color: #f0cdc5; }
+.tint-gray { background: var(--bg-gray); border-color: #dfe4ea; }
+.tint-green { background: var(--bg-green); border-color: #c8e2d1; }
+
+/* 左侧色条盒（流程节点） */
+.node { position: relative; border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px 8px 14px; background: #fff; }
+.node::before { content: ""; position: absolute; left: -1px; top: 8px; bottom: 8px; width: 4px; border-radius: 2px; background: var(--line-strong); }
+.node.c-blue::before { background: var(--blue); } .node.c-teal::before { background: var(--teal); }
+.node.c-amber::before { background: var(--amber); } .node.c-red::before { background: var(--red); }
+.node.c-green::before { background: var(--green); } .node.c-gray::before { background: var(--gray); }
+
+/* ---------- 徽标 · 标签 ---------- */
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11.5px; font-weight: 600; padding: 1px 8px; border-radius: 20px;
+  border: 1px solid var(--line-strong); color: var(--sub); background: #fff; white-space: nowrap;
+}
+.chip.llm { background: var(--bg-teal); border-color: var(--teal); color: var(--teal-dk); }
+.chip.code { background: var(--bg-gray); border-color: var(--line-strong); color: #475569; }
+.chip.red { background: var(--bg-red); border-color: #e5b7ae; color: var(--red-dk); }
+.chip.amber { background: var(--bg-amber); border-color: #e8d4a4; color: #8a5a12; }
+.chip.blue { background: var(--bg-blue); border-color: #b9d2ec; color: var(--blue-dk); }
+.chip.green { background: var(--bg-green); border-color: #b9dcc7; color: #216745; }
+.tag-code { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 11.5px; color: #33506e; background: #f0f4f9; border-radius: 4px; padding: 0 5px; }
+
+/* ---------- 流程箭头 ---------- */
+.flow-down { display: flex; justify-content: center; padding: 2px 0; }
+.flow-down::before {
+  content: ""; width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent;
+  border-top: 9px solid var(--line-strong);
+}
+.flow-right { display: flex; align-items: center; padding: 0 2px; }
+.flow-right::before {
+  content: ""; width: 0; height: 0; border-top: 7px solid transparent; border-bottom: 7px solid transparent;
+  border-left: 9px solid var(--line-strong);
+}
+
+/* ---------- 布局 ---------- */
+.row { display: flex; gap: 14px; }
+.col { display: flex; flex-direction: column; gap: 0; }
+.grow { flex: 1 1 0; min-width: 0; }
+
+/* ---------- 图注脚 ---------- */
+.fig-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 16px; padding-top: 8px; border-top: 1px solid var(--line);
+  font-size: 11px; color: var(--faint);
+}
+
+/* ---------- 表格（开关矩阵等） ---------- */
+table.matrix { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+table.matrix th { background: #22303f; color: #fff; font-weight: 600; padding: 5px 10px; text-align: left; }
+table.matrix th:first-child { border-radius: 6px 0 0 0; } table.matrix th:last-child { border-radius: 0 6px 0 0; }
+table.matrix td { border-bottom: 1px solid var(--line); padding: 5px 10px; vertical-align: top; }
+table.matrix td:first-child { font-weight: 650; white-space: nowrap; }
+table.matrix tr:last-child td { border-bottom: none; }
+
+/* ---------- 泳道（时序走查） ---------- */
+.lane-grid { display: grid; grid-template-columns: 96px repeat(10, 1fr); gap: 4px; }
+.lane-head { font-size: 12px; font-weight: 700; padding: 6px 4px; border-radius: 6px; text-align: center; }
+.lane-label { font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; text-align: center; padding: 4px; border-radius: 6px; }
+.lane-cell { border: 1px solid var(--line); border-radius: 6px; padding: 6px 7px; font-size: 11.5px; line-height: 1.4; min-height: 44px; }
+.lane-cell small { color: var(--sub); font-size: 10.5px; display: block; }
+.t-cell { font-family: ui-monospace, Consolas, monospace; text-align: center; font-size: 11px; font-weight: 700; color: #475569; align-self: center; }

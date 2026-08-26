@@ -1,0 +1,209 @@
+{
+  "rubric_id": "P0-GC-T2DM-001-RUBRIC",
+  "scenario_id": "P0-GC-T2DM-001",
+  "version": "0.1.0-draft",
+  "medical_review": "未做临床终审；医学依据条目均为教学示意引用，上线前必须逐条核对指南原文（见 README）",
+  "predicate_dsl": {
+    "functions": {
+      "ASKED": "topics: 任意轮次 ASK 动作命中给定主题集合",
+      "ASKED_AFTER_FOLLOWUP": "topics: 该主题在追问（同主题≥2次 ASK）后才命中——用于检测 second_ask_concede 是否被触发",
+      "EXAMINED": "items: EXAM 动作命中给定查体项",
+      "ORDERED": "items: ORDER 动作命中给定项目",
+      "ORDERED_BEFORE": "items, event_class: 项目开单时间早于某类事件（如 PRESCRIBE）",
+      "NOT_ORDERED": "items: 全程未开某项目",
+      "DIAGNOSED": "codes_or_text: DIAGNOSE 动作匹配编码或关键词",
+      "PRESCRIBED": "drug_classes: PRESCRIBE 动作命中药物类别",
+      "DOCUMENTED": "fields: 最终病历包含给定字段且非空",
+      "TOTAL_FEE": "range: 账单总额区间",
+      "TRACE": "trace 片段引用，供 judge 前置过滤"
+    },
+    "enforcement_mix_rationale": "结构可判的走代码（便宜、零噪声、可单测）；语义可判的走 judge（灵活、需引用）。比例本例 16 auto / 6 judge"
+  },
+  "categories": {
+    "_note": "类内得分=成立条款权重和/适用条款权重和×100，跨类不比较绝对值；下列数值为各类条款权重总和（process 44 / outcome 36 / communication 15 / cost 10）",
+    "process": 44, "outcome": 36, "communication": 15, "cost": 10
+  },
+  "items": [
+    {
+      "id": "R01", "category": "process", "subcategory": "问诊覆盖-核心症状", "weight": 4,
+      "enforcement": "auto",
+      "predicate": { "fn": "ASKED", "topics": ["polydipsia_polyuria"] },
+      "medical_basis": "糖尿病问诊核心：多饮多尿【CDS 2020 教学示意，条目待核验】",
+      "target": "主动询问多饮/多尿/口渴"
+    },
+    {
+      "id": "R02", "category": "process", "subcategory": "问诊覆盖-核心症状", "weight": 3,
+      "enforcement": "auto",
+      "predicate": { "fn": "ASKED", "topics": ["weight_loss"] },
+      "medical_basis": "体重变化是本例主诉组成部分",
+      "target": "询问体重下降详情"
+    },
+    {
+      "id": "R03", "category": "process", "subcategory": "安全筛查", "weight": 4,
+      "enforcement": "auto",
+      "predicate": { "fn": "ASKED", "topics": ["medication_adherence"] },
+      "medical_basis": "调方案前必须核实当前用药与依从性【教学示意】",
+      "target": "核实二甲双胍用法与实际服用情况"
+    },
+    {
+      "id": "R04", "category": "process", "subcategory": "依从性深挖", "weight": 3,
+      "enforcement": "auto",
+      "predicate": { "fn": "ASKED_AFTER_FOLLOWUP", "topics": ["medication_adherence"] },
+      "medical_basis": "患者首答「基本按时吃」，追问后才承认漏服——单次提问拿到的是假依从",
+      "target": "对依从性做了至少一次追问（问出漏服事实）"
+    },
+    {
+      "id": "R05", "category": "process", "subcategory": "安全筛查", "weight": 4,
+      "enforcement": "auto",
+      "predicate": { "fn": "ASKED", "topics": ["hypoglycemia_screen"] },
+      "medical_basis": "降糖方案调整前筛查低血糖史【教学示意】",
+      "target": "询问低血糖症状（passive 主题，必须主动问）"
+    },
+    {
+      "id": "R06", "category": "process", "subcategory": "并发症筛查", "weight": 4,
+      "enforcement": "auto",
+      "predicate": { "fn": "ASKED", "topics": ["foot_numbness"] },
+      "medical_basis": "糖尿病随访应筛查周围神经病变症状【CDS 2020 教学示意，条目待核验】",
+      "target": "主动询问手脚麻木/感觉异常（本例核心考点：患者绝不主动提）"
+    },
+    {
+      "id": "R07", "category": "process", "subcategory": "危险因素", "weight": 2,
+      "enforcement": "auto",
+      "predicate": { "fn": "ASKED", "topics": ["smoking_alcohol"] },
+      "medical_basis": "心血管危险因素采集",
+      "target": "询问吸烟饮酒（注意：饮酒实际量需追问，见 R08）"
+    },
+    {
+      "id": "R08", "category": "process", "subcategory": "隐瞒突破", "weight": 3,
+      "enforcement": "auto",
+      "predicate": { "fn": "ASKED_AFTER_FOLLOWUP", "topics": ["smoking_alcohol"] },
+      "medical_basis": "患者首答「偶尔喝点」，追问后才承认每日2两",
+      "target": "对饮酒量做了追问（拿到真实饮酒量）"
+    },
+    {
+      "id": "R09", "category": "process", "subcategory": "查体", "weight": 5,
+      "enforcement": "auto",
+      "predicate": { "fn": "EXAMINED", "items": ["vital_signs"] },
+      "medical_basis": "高血压唯一检出路径=测量（患者不知晓、问不出）",
+      "target": "测量生命体征（含血压）——本例核心考点"
+    },
+    {
+      "id": "R10", "category": "process", "subcategory": "查体", "weight": 4,
+      "enforcement": "auto",
+      "predicate": { "fn": "EXAMINED", "items": ["foot_exam"] },
+      "medical_basis": "糖尿病足部年度检查【CDS 2020 教学示意，条目待核验】",
+      "target": "做足部检查（与 R06 构成双路径：问诊或查体任一路径发现神经病变）"
+    },
+    {
+      "id": "R11", "category": "process", "subcategory": "检查指征", "weight": 4,
+      "enforcement": "auto",
+      "predicate": { "fn": "ORDERED", "items": ["random_glucose", "hba1c"] },
+      "medical_basis": "血糖评估是本例必需检查",
+      "target": "开具血糖/HbA1c 评估"
+    },
+    {
+      "id": "R12", "category": "process", "subcategory": "处方安全", "weight": 4,
+      "enforcement": "auto",
+      "predicate": { "fn": "ORDERED_BEFORE", "items": ["renal_function"], "event_class": "PRESCRIBE" },
+      "medical_basis": "二甲双胍使用需评估肾功能【教学示意】（引用1年内既往肾功能记录等效，由 judge 复核路径）",
+      "target": "处方调整前有本次或引用既往的肾功能评估"
+    },
+    {
+      "id": "R13", "category": "outcome", "subcategory": "诊断", "weight": 8,
+      "enforcement": "auto",
+      "predicate": { "fn": "DIAGNOSED", "codes_or_text": ["E11", "2型糖尿病", "血糖控制不佳"] },
+      "medical_basis": "主诊断",
+      "target": "最终病历诊断含 2型糖尿病血糖控制不佳"
+    },
+    {
+      "id": "R14", "category": "outcome", "subcategory": "共病检出", "weight": 7,
+      "enforcement": "auto",
+      "predicate": { "fn": "DIAGNOSED", "codes_or_text": ["I10", "高血压"] },
+      "depends_on": ["R09"],
+      "medical_basis": "2级高血压首次发现（162/96，就高原则）【分级标准待核验】",
+      "target": "诊断高血压——依赖 R09（没测血压不可能诊断）"
+    },
+    {
+      "id": "R15", "category": "outcome", "subcategory": "并发症识别", "weight": 6,
+      "enforcement": "judge",
+      "question": "最终病历是否体现糖尿病周围神经病变的识别（纳入诊断、或记录阳性发现并建议专科/神经传导评估）？证据可来自问诊足麻或足部查体任一路径",
+      "depends_on": ["R06", "R10"],
+      "medical_basis": "症状或体征任一阳性即应识别并处理【教学示意】",
+      "target": "识别神经病变（问诊或查体路径均可）"
+    },
+    {
+      "id": "R16", "category": "outcome", "subcategory": "处置-降糖", "weight": 6,
+      "enforcement": "judge",
+      "question": "处置是否包含合理的降糖方案优化（规范足量二甲双胍/加用二线口服药/起始胰岛素均可），且最终病历解释了方案调整理由？仅原方续开不认可",
+      "medical_basis": "HbA1c 9.2% 需强化治疗【CDS 2020 教学示意，条目待核验】",
+      "target": "降糖方案优化+理由"
+    },
+    {
+      "id": "R17", "category": "outcome", "subcategory": "处置-教育与依从性", "weight": 6,
+      "enforcement": "judge",
+      "question": "是否针对漏服药和含糖饮料做了明确的患者教育（患者能懂的语言，指向具体轮次或病历文句），并给出血压管理处置（启动药物或明确的短期复测-启动计划）？两者俱全才判成立",
+      "medical_basis": "本例治疗失败根因是依从性——不处理依从性=治标不治本；糖尿病+2级高血压应启动降压【教学示意】",
+      "target": "依从性/生活方式教育 + 血压管理"
+    },
+    {
+      "id": "R18", "category": "outcome", "subcategory": "随访与筛查", "weight": 3,
+      "enforcement": "judge",
+      "question": "是否安排了眼底筛查（转诊安排即可，本院未开展不是理由）并给出 3 个月复查 HbA1c 计划与足部自我护理指导？",
+      "medical_basis": "糖尿病并发症年度筛查【教学示意】",
+      "target": "眼底筛查转诊 + 复查计划 + 足护理教育"
+    },
+    {
+      "id": "R19", "category": "communication", "subcategory": "解释质量", "weight": 8,
+      "enforcement": "judge",
+      "question": "医生是否用患者能懂的语言解释了病情与调整原因（如「糖化血红蛋白」是否翻译成大白话）？引用具体轮次原文",
+      "medical_basis": "健康素养低设定（persona_card）下的沟通要求",
+      "target": "通俗解释（引用轮次）"
+    },
+    {
+      "id": "R20", "category": "communication", "subcategory": "压力应对", "weight": 7,
+      "enforcement": "judge",
+      "question": "患者催促（TS-1 触发后）医生是否保持耐心并妥善安抚/合理安排流程，未表现不耐烦或敷衍（如「别催，等着」）？未触发 TS-1 则判 NOT_APPLICABLE",
+      "medical_basis": "时间压力下的沟通",
+      "target": "催促场景的应对"
+    },
+    {
+      "id": "R21", "category": "cost", "subcategory": "合理检查", "weight": 6,
+      "enforcement": "auto",
+      "predicate": { "fn": "TOTAL_FEE", "range": [200, 600] },
+      "medical_basis": "合理路径 ¥195–375（含 TSH 鉴别）",
+      "target": "总费用在合理区间"
+    },
+    {
+      "id": "R22", "category": "cost", "subcategory": "无指征检查", "weight": 4,
+      "enforcement": "auto",
+      "predicate": { "fn": "NOT_ORDERED", "items": ["ogtt"] },
+      "medical_basis": "已确诊糖尿病且随机血糖 13.8，OGTT 无指征",
+      "target": "未开无指征的 OGTT"
+    }
+  ],
+  "aggregation": {
+    "score_report": "按 process/outcome/communication/cost 四类分别汇总为百分比，不合成单一总分；类内得分 = Σ(成立条款权重)/Σ(适用条款权重)×100",
+    "na_handling": "NOT_APPLICABLE 条款从分母剔除（如 R20 未触发场景）",
+    "dependency_handling": "depends_on 未成立的条款仍判定但报告中标注「路径未打通」（如 R14 在未测血压时不可能成立——这本身就是诊断信号）",
+    "reliability_gates": "本 P0 阶段人工全量核对；重复评分/抽查/区分度三道门为 P2 上线（架构文档 §6.3）"
+  },
+  "judge_io_contract": {
+    "judge_input": {
+      "case_truth": "全量（含运行时从未揭示层）",
+      "trace": "三层完整日志（dialogue / actions / states）",
+      "final_record": "结构化最终病历",
+      "rubric_items": "仅 enforcement=judge 的条款（R15-R20）",
+      "context_notes": "persona_card 与 time_state_items（解释患者行为用）"
+    },
+    "judge_output_schema": {
+      "item_id": "R15…R20",
+      "verdict": "SATISFIED | NOT_SATISFIED | NOT_APPLICABLE | INSUFFICIENT_EVIDENCE",
+      "citations": [
+        { "layer": "action | dialogue | truth | final_record", "ref": "turn_id / action_id / truth_field_path / 病历字段", "quote": "≤50字原文摘录" }
+      ],
+      "confidence": "0–1",
+      "rationale": "一句话判定理由"
+    },
+    "sampling": "temperature 0；每条款独立判定；同批条款互不可见彼此判定（防级联偏置）；一次失败最多重试1次"
+  }
+}

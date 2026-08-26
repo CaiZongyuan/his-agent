@@ -22,3 +22,4 @@
 |---|---|---|---|
 | `prompts/medical-agent-banner.md` | 生成式图片 prompt 与修订记录 | 本仓库生成（Codex custom provider，`gpt-image-2`）；2026-08-25 | 重建或调整仓库 README 头图（医疗领域 × 智能体封面插画） |
 | `prompts/teaching-wedge-pipeline.md` | 生成式图片 prompt 与修订记录 | 本仓库生成（Codex custom provider，`gpt-image-2`）；2026-08-26 | 重建或调整教学楔子五层管线架构图（`docs/lessons/teaching-wedge-pipeline/`） |
+| `sources/sandbox-figures/` | HTML/CSS 确定性图稿源（问诊沙盘架构图 1–4）＋共享设计系统 `sandbox-figure.css` | 本仓库生成（HTML/CSS + Chromium @2x，入口 `scripts/render-html-figure.mjs`，需 `PLAYWRIGHT_DIR` 指向含 node_modules/playwright 的目录）；2026-08-26 | 重建或调整 `docs/platform/Consultation_Sandbox_Architecture_v0.1.md` 四张配图：总体架构 / 运行时双引擎 / 轨迹走查 / 评分器双轨。改图→改 HTML→重渲染→cwebp -q 90 回写 `docs/platform/assets/` |

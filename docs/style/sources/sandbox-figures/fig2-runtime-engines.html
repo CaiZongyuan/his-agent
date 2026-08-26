@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="sandbox-figure.css">
+<style>
+  .step { display: flex; gap: 10px; align-items: stretch; }
+  .step-no { width: 26px; height: 26px; border-radius: 50%; background: #22303f; color: #fff; font-weight: 700;
+             font-size: 13px; display: flex; align-items: center; justify-content: center; flex: none; margin-top: 2px; }
+  .step-no.llm { background: var(--teal); }
+  .window-list { list-style: none; margin-top: 4px; }
+  .window-list li { font-size: 12px; padding: 1.5px 0 1.5px 16px; position: relative; color: #33414f; }
+  .window-list li::before { content: "▸"; position: absolute; left: 2px; color: var(--blue); font-size: 11px; }
+  .window-list li.bad::before { content: "✕"; color: var(--red); font-weight: 700; }
+  .tier { border: 1px solid var(--line); border-left: 5px solid; border-radius: 8px; padding: 7px 11px; }
+  .tier .t-name { font-size: 14px; font-weight: 700; }
+  .tier .t-ex { font-size: 11.5px; color: var(--sub); margin-top: 1px; }
+  .miss-arrow { display: flex; align-items: center; gap: 8px; justify-content: center; padding: 1px 0; color: var(--faint); font-size: 11px; }
+  .miss-arrow::before, .miss-arrow::after { content: ""; width: 0; height: 0; }
+  .down-tri { display: flex; justify-content: center; padding: 1px 0; }
+  .down-tri::before { content: ""; width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 8px solid #9fb0c0; }
+</style>
+</head>
+<body>
+
+<div class="row" style="align-items:stretch;">
+
+  <!-- ══════════ a · 患者 agent 五步流水线 ══════════ -->
+  <div class="panel" style="flex:0.94; display:flex; flex-direction:column;">
+    <div class="panel-title-row" style="margin-bottom:10px;">
+      <div class="panel-letter">a</div>
+      <div class="panel-title">患者 agent：逐回合五步流水线</div>
+      <div class="panel-sub">只有 ③ 是 LLM 自由生成，其余逐步收紧</div>
+    </div>
+
+    <div class="step"><div class="step-no llm">①</div>
+      <div class="node c-teal grow"><div class="box-title">主题路由器 <span class="chip llm">轻量分类 LLM</span></div>
+      <div class="box-note">问句 → 症状应答表主题 id（0/1/N 个）；置信度 &lt; 0.6 按 miss → 患者答「没太注意」；两次 miss 进人工审阅</div></div>
+    </div>
+    <div class="down-tri"></div>
+
+    <div class="step"><div class="step-no">②</div>
+      <div class="node c-blue grow tint-blue"><div class="box-title">事实窗口装配 <span class="chip code">纯代码</span> — 最小权限窗口</div>
+        <ul class="window-list">
+          <li>人设卡：陈建国 · 55 岁 · 货车司机 · 健康素养低 · 急性子</li>
+          <li>命中主题的应答要点 / 否认项 / 回避项（患者语言预写定）</li>
+          <li>患者认知层相关条目（患者只知道「经历过的」）</li>
+          <li>拒答规则（未命中主题时窗口里只有它）＋ 近 N 轮对话</li>
+          <li class="bad">完整 CaseTruth —— 永不进入患者 LLM 上下文</li>
+        </ul></div>
+    </div>
+    <div class="down-tri"></div>
+
+    <div class="step"><div class="step-no llm">③</div>
+      <div class="node c-teal grow"><div class="box-title">角色化生成 <span class="chip llm">患者 LLM · 低温度</span></div>
+      <div class="box-note">第一人称口语化窗口内事实 ＋ 情绪反应；禁止引入窗口外新事实、禁止编排时间线</div></div>
+    </div>
+    <div class="down-tri"></div>
+
+    <div class="step"><div class="step-no">④</div>
+      <div class="node c-blue grow"><div class="box-title">事实校验器 <span class="chip code">独立 LLM / NLI</span></div>
+      <div class="box-note">逐句可追溯：每句必须映射到窗口内条目（或纯语气句）；违规 → 携原因重生成（≤2 次）→ 仍失败降级模板句</div></div>
+    </div>
+    <div class="down-tri"></div>
+
+    <div class="step"><div class="step-no">⑤</div>
+      <div class="node c-gray grow tint-gray"><div class="box-title">写三层日志 <span class="chip code">纯代码</span></div>
+      <div class="box-note">对话层原文｜动作层 <span class="tag-code">ASK(命中主题)</span>｜状态层（R 无新揭示）</div></div>
+    </div>
+
+    <div class="box tint-amber" style="margin-top:12px;">
+      <div class="box-title" style="font-size:13.5px;">患者知识三边界（role-play 分水岭，由认知层保证）</div>
+      <div class="box-note">① 不知道自己的「真值」——只知道经历与被告知　② 症状可述、体征不可述——血压 162/96 只能测出来　③ 边界外答「没注意」是特性不是缺陷</div>
+      <div style="margin-top:6px;"><span class="chip amber">second_ask_concede：首答「基本按时吃」→ 追问才松口「经常漏服」；「偶尔喝点」→「一天二两白酒」</span></div>
+    </div>
+  </div>
+
+  <!-- ══════════ b · 虚拟 HIS 三级结果解析 ══════════ -->
+  <div class="panel grow" style="display:flex; flex-direction:column;">
+    <div class="panel-title-row" style="margin-bottom:10px;">
+      <div class="panel-letter">b</div>
+      <div class="panel-title">虚拟 HIS：三级结果解析</div>
+      <div class="panel-sub">「医生开了计划外检查」的完整答案</div>
+    </div>
+
+    <div class="node c-amber"><div class="box-title">医生动作：<span class="tag-code">EXAM(项)</span> / <span class="tag-code">ORDER(单)</span> —— 任何项目都要有返回</div></div>
+    <div class="down-tri"></div>
+
+    <div class="tier" style="border-left-color:var(--blue); background:var(--bg-blue);">
+      <div class="t-name">L1 表内项 <span class="chip blue">CaseTruth 精确值</span></div>
+      <div class="t-ex">命中编译期检查结果表 / 体征表 → 直接返回。例：HbA1c 9.2% ↑（表内）；足底针刺觉减退（体征表）</div>
+    </div>
+    <div class="miss-arrow">↓ 未命中</div>
+
+    <div class="tier" style="border-left-color:var(--teal); background:var(--bg-teal);">
+      <div class="t-name">L2 派生项 <span class="chip code">生理基线集 ± 种子噪声</span></div>
+      <div class="t-ex">生成器挂在患者身上（编译期安装，共病修正）。例：血常规 WBC 6.8（正常基线）；BP 基线 162/96＝「未控制高血压」状态；派生链 eGFR = f(肌酐)</div>
+    </div>
+    <div class="miss-arrow">↓ 仍未命中</div>
+
+    <div class="tier" style="border-left-color:var(--gray); background:var(--bg-gray);">
+      <div class="t-name">L3 默认正常 <span class="chip code">目录字典 · 种子采样</span></div>
+      <div class="t-ex">该项目正常参考分布采样（重放一致）＋ 记 <span class="tag-code">unmodeled_item</span> 标记 → 运营回流补表。例：肿瘤标志物 → 正常值。L3 永不成为 rubric 正向证据</div>
+    </div>
+    <div class="miss-arrow" style="color:var(--amber);">↘ 第四级 · 目录边界</div>
+
+    <div class="tier" style="border-left-color:var(--amber); background:var(--bg-amber); margin-left:60px;">
+      <div class="t-name">本院未开展 <span class="chip amber">本身是考题</span></div>
+      <div class="t-ex">「可外送或转诊」——例：眼底检查 ¥0，正确行为是安排转诊而非放弃</div>
+    </div>
+
+    <div class="down-tri"></div>
+    <div class="node c-red tint-red"><div class="box-title">跨项目一致性校验器（作用于全部三级产出）</div>
+      <div class="box-note">计算耦合：Hb/RBC/HCV 互锁，eGFR⇐肌酐　·　病理耦合：血糖 13.8 ⇒ 尿糖必须 3+　·　时间耦合：复测＝同生成器读数 ± 测定 CV</div></div>
+    <div class="down-tri"></div>
+
+    <div class="row">
+      <div class="node c-green tint-green grow"><div class="box-title">四件套（每一单必有）</div>
+        <div class="box-note">结果数值｜报告文本（模板＋占位符，LLM 只渲染）｜TAT 延迟（血常规 20min · HbA1c 2h）｜费用行（进账单 → 费用分）</div></div>
+      <div class="node c-red grow" style="flex:0.62;"><div class="box-title">危急值 <span class="chip red">仅 L1/L2 可触发</span></div>
+        <div class="box-note">血糖 33.5 · 血钾 6.8 → 即时打断流程，考核安全响应</div></div>
+    </div>
+
+    <div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">
+      <span class="chip blue">不变量① 结果 = f(项目, 患者状态, 场景种子)，重放逐字节一致</span>
+      <span class="chip blue">不变量② 数值与文本分离</span>
+      <span class="chip blue">不变量③ L3 只出正常值</span>
+    </div>
+  </div>
+</div>
+
+<div class="fig-footer">
+  <span>机制先例：Synthea 生成器挂在患者身上、检查只是读取（State.java）；AI Hospital「查无此项答无异常」的 LLM 决定路线为本设计所弃</span>
+  <span>问诊沙盘架构 v0.1 · 图 2 · 2026-08 · 教学示意图</span>
+</div>
+
+</body>
+</html>
