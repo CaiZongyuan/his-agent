@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../sandbox-figures/sandbox-figure.css">
+<style>
+  * { letter-spacing: 0; }
+  body { width: 1600px; padding: 38px 42px 28px; font-size: 14px; }
+  .hero { display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: end; padding-bottom: 20px; border-bottom: 2px solid #22303f; }
+  .eyebrow { color: var(--teal-dk); font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  h1 { font-size: 31px; line-height: 1.2; font-weight: 750; }
+  .subtitle { color: var(--sub); font-size: 15px; margin-top: 7px; }
+  .legend { display: flex; gap: 8px; align-items: center; }
+  .legend-item { border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px; min-width: 100px; background: #fff; }
+  .legend-item b { display: block; font-size: 13px; }
+  .legend-item span { color: var(--sub); font-size: 11px; }
+  .legend-item.v1 { border-top: 4px solid var(--green); }
+  .legend-item.v2 { border-top: 4px solid var(--amber); }
+  .legend-item.v3 { border-top: 4px solid var(--gray); }
+
+  .section-head { display: flex; align-items: center; gap: 12px; margin: 20px 0 10px; }
+  .section-head h2 { font-size: 19px; }
+  .section-head .rule { height: 1px; background: var(--line); flex: 1; }
+  .section-head p { color: var(--sub); font-size: 12px; }
+
+  .phase-grid { display: grid; grid-template-columns: 1fr 1fr 1.35fr 1fr 1.35fr; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .phase { min-width: 0; padding: 0 11px 12px; border-right: 1px solid var(--line); background: #fff; }
+  .phase:last-child { border-right: 0; }
+  .phase-title { margin: 0 -11px 10px; padding: 10px 12px 9px; min-height: 57px; border-bottom: 1px solid var(--line); }
+  .phase-title b { display: block; font-size: 16px; }
+  .phase-title span { color: var(--sub); font-size: 11.5px; }
+  .pre .phase-title { background: var(--bg-blue); border-top: 5px solid var(--blue); }
+  .care .phase-title { background: var(--bg-teal); border-top: 5px solid var(--teal); }
+  .guard .phase-title { background: var(--bg-amber); border-top: 5px solid var(--amber); }
+  .follow .phase-title { background: var(--bg-green); border-top: 5px solid var(--green); }
+  .record .phase-title { background: var(--bg-red); border-top: 5px solid var(--red); }
+
+  .scene { display: grid; grid-template-columns: 31px 1fr auto; gap: 7px; align-items: center; min-height: 43px; padding: 6px 0; border-bottom: 1px solid #e9edf2; }
+  .scene:last-child { border-bottom: 0; }
+  .sid { width: 29px; height: 25px; display: flex; align-items: center; justify-content: center; border-radius: 5px; color: #fff; background: #344454; font-size: 11px; font-weight: 750; font-family: ui-monospace, Consolas, monospace; }
+  .sname { min-width: 0; font-size: 12.5px; line-height: 1.3; font-weight: 650; }
+  .marks { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+  .mark { border-radius: 4px; padding: 1px 5px; font-size: 9.5px; line-height: 1.4; white-space: nowrap; border: 1px solid var(--line); color: var(--sub); }
+  .mark.v1 { color: #216745; background: var(--bg-green); border-color: #b9dcc7; }
+  .mark.v2 { color: #8a5a12; background: var(--bg-amber); border-color: #e8d4a4; }
+  .mark.v3 { color: #475569; background: var(--bg-gray); border-color: var(--line-strong); }
+  .mark.strategic { color: var(--red-dk); background: var(--bg-red); border-color: #e5b7ae; }
+  .mark.value { color: var(--blue-dk); background: var(--bg-blue); border-color: #b9d2ec; }
+  .mark.innovation { color: var(--teal-dk); background: var(--bg-teal); border-color: #b7dbd4; }
+  .mark.combo { color: #475569; background: var(--bg-gray); border-color: var(--line-strong); }
+
+  .matrix-wrap { display: grid; grid-template-columns: 1fr 420px; gap: 14px; }
+  .opportunity { display: grid; grid-template-columns: 128px repeat(3, 1fr); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .mcell { min-height: 70px; padding: 9px 11px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); font-size: 11.5px; line-height: 1.4; }
+  .mcell:nth-child(4n) { border-right: 0; }
+  .mcell.bottom { border-bottom: 0; }
+  .mhead { min-height: 34px; display: flex; align-items: center; justify-content: center; background: #22303f; color: #fff; font-weight: 700; }
+  .axis { display: flex; align-items: center; justify-content: center; text-align: center; background: var(--bg-gray); font-weight: 700; color: #475569; }
+  .mcell b { display: block; font-size: 12.5px; margin-bottom: 4px; }
+  .mcell small { color: var(--sub); font-size: 10.5px; }
+  .strategic-cell { background: #fdf6f4; }
+  .value-cell { background: #f7fafe; }
+  .innovation-cell { background: #f3faf8; }
+
+  .principle { border: 1px solid #e8d4a4; border-left: 5px solid var(--amber); border-radius: 8px; background: #fffaf0; padding: 14px 16px; }
+  .principle h3 { font-size: 15px; margin-bottom: 7px; }
+  .principle p { font-size: 12px; color: var(--sub); line-height: 1.55; }
+  .principle strong { color: var(--ink); }
+  .principle .steps { display: flex; gap: 5px; align-items: center; margin-top: 10px; font-size: 11px; font-weight: 650; }
+  .principle .step { border: 1px solid var(--line-strong); border-radius: 5px; padding: 4px 7px; background: #fff; }
+  .principle .arrow { color: var(--faint); }
+
+  .fig-footer { margin-top: 14px; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div>
+    <div class="eyebrow">门诊诊疗流程 × 病历生命周期</div>
+    <h1>门诊医疗智能体场景全景</h1>
+    <div class="subtitle">从患者进入到病历再利用：24 个可独立验证的业务闭环</div>
+  </div>
+  <div class="legend" aria-label="验证成熟度">
+    <div class="legend-item v1"><b>V1 近期验证</b><span>边界清楚，可先试点</span></div>
+    <div class="legend-item v2"><b>V2 条件拓展</b><span>需规则、连接或评测</span></div>
+    <div class="legend-item v3"><b>V3 长期研究</b><span>需复杂治理与验证</span></div>
+  </div>
+</header>
+
+<div class="section-head">
+  <h2>五段场景地图</h2><div class="rule"></div><p>编号对应报告明细；色签表示客户机会分组</p>
+</div>
+
+<section class="phase-grid">
+  <div class="phase pre">
+    <div class="phase-title"><b>诊前准备</b><span>患者进入 · 信息准备</span></div>
+    <div class="scene"><span class="sid">P1</span><span class="sname">就医准备智能体</span><span class="marks"><i class="mark value">价值优先</i><i class="mark v2">V2</i></span></div>
+    <div class="scene"><span class="sid">P2</span><span class="sname">挂号资料协作智能体</span><span class="marks"><i class="mark value">价值优先</i><i class="mark v1">V1</i></span></div>
+    <div class="scene"><span class="sid">P3</span><span class="sname">预问诊与危险信号分流</span><span class="marks"><i class="mark strategic">战略优先</i><i class="mark v2">V2</i></span></div>
+    <div class="scene"><span class="sid">P4</span><span class="sname">接诊准备智能体</span><span class="marks"><i class="mark strategic">战略优先</i><i class="mark v1">V1</i></span></div>
+  </div>
+
+  <div class="phase care">
+    <div class="phase-title"><b>门诊诊疗</b><span>信息 · 决策 · 动作 · 文书</span></div>
+    <div class="scene"><span class="sid">C1</span><span class="sname">问诊协作智能体</span><span class="marks"><i class="mark strategic">战略优先</i><i class="mark v1">V1→V2</i></span></div>
+    <div class="scene"><span class="sid">C2</span><span class="sname">临床决策支持智能体</span><span class="marks"><i class="mark strategic">战略优先</i><i class="mark v2">V2</i></span></div>
+    <div class="scene"><span class="sid">C3</span><span class="sname">临床动作准备智能体</span><span class="marks"><i class="mark strategic">战略优先</i><i class="mark v1">V1</i></span></div>
+    <div class="scene"><span class="sid">C4</span><span class="sname">临床文书智能体</span><span class="marks"><i class="mark value">价值优先</i><i class="mark v1">V1→V2</i></span></div>
+  </div>
+
+  <div class="phase guard">
+    <div class="phase-title"><b>审查与执行</b><span>规则核验 · 异常闭环</span></div>
+    <div class="scene"><span class="sid">G1</span><span class="sname">检查检验适宜性审核</span><span class="marks"><i class="mark value">价值优先</i><i class="mark v2">V2</i></span></div>
+    <div class="scene"><span class="sid">G2</span><span class="sname">合理用药审核智能体</span><span class="marks"><i class="mark value">价值优先</i><i class="mark v2">V2</i></span></div>
+    <div class="scene"><span class="sid">G3</span><span class="sname">医保合规审核智能体</span><span class="marks"><i class="mark strategic">战略优先</i><i class="mark v2">V2→V3</i></span></div>
+    <div class="scene"><span class="sid">G4</span><span class="sname">病历实时质控智能体</span><span class="marks"><i class="mark value">价值优先</i><i class="mark v2">V2</i></span></div>
+    <div class="scene"><span class="sid">G5</span><span class="sname">检验结果与危急值处置</span><span class="marks"><i class="mark strategic">战略优先</i><i class="mark v2">V2</i></span></div>
+    <div class="scene"><span class="sid">G6</span><span class="sname">收费与药房异常协作</span><span class="marks"><i class="mark strategic">战略优先</i><i class="mark v1">V1→V2</i></span></div>
+  </div>
+
+  <div class="phase follow">
+    <div class="phase-title"><b>诊后服务</b><span>教育 · 随访 · 协调</span></div>
+    <div class="scene"><span class="sid">F1</span><span class="sname">个性化患者教育</span><span class="marks"><i class="mark combo">组合能力</i><i class="mark v2">V2</i></span></div>
+    <div class="scene"><span class="sid">F2</span><span class="sname">随访与慢病监测</span><span class="marks"><i class="mark strategic">战略优先</i><i class="mark v2">V2→V3</i></span></div>
+    <div class="scene"><span class="sid">F3</span><span class="sname">转诊与复诊协调</span><span class="marks"><i class="mark innovation">创新储备</i><i class="mark v2">V2→V3</i></span></div>
+    <div class="scene"><span class="sid">F4</span><span class="sname">延迟结果跟进智能体</span><span class="marks"><i class="mark strategic">战略优先</i><i class="mark v2">V2</i></span></div>
+  </div>
+
+  <div class="phase record">
+    <div class="phase-title"><b>病历生命周期</b><span>连续照护 · 教学 · 科研</span></div>
+    <div class="scene"><span class="sid">R1</span><span class="sname">下次接诊摘要智能体</span><span class="marks"><i class="mark value">价值优先</i><i class="mark v1">V1→V2</i></span></div>
+    <div class="scene"><span class="sid">R2</span><span class="sname">病历质量审核与缺陷归因</span><span class="marks"><i class="mark value">价值优先</i><i class="mark v2">V2</i></span></div>
+    <div class="scene"><span class="sid">R3</span><span class="sname">诊疗教学评测智能体</span><span class="marks"><i class="mark innovation">创新储备</i><i class="mark v2">V2</i></span></div>
+    <div class="scene"><span class="sid">R4</span><span class="sname">科研队列与试验初筛</span><span class="marks"><i class="mark innovation">创新储备</i><i class="mark v3">V3</i></span></div>
+    <div class="scene"><span class="sid">R5</span><span class="sname">科研数据准备与质量审计</span><span class="marks"><i class="mark innovation">创新储备</i><i class="mark v2">V2→V3</i></span></div>
+    <div class="scene"><span class="sid">R6</span><span class="sname">脱敏病例共享智能体</span><span class="marks"><i class="mark combo">组合能力</i><i class="mark v3">V3</i></span></div>
+  </div>
+</section>
+
+<div class="section-head">
+  <h2>商业价值优先的机会矩阵</h2><div class="rule"></div><p>先看商业价值，再看智能体创新性；成熟度只决定验证顺序</p>
+</div>
+
+<section class="matrix-wrap">
+  <div class="opportunity">
+    <div class="mcell mhead">商业价值</div><div class="mcell mhead">高创新</div><div class="mcell mhead">中创新</div><div class="mcell mhead">低创新</div>
+    <div class="mcell axis">高</div>
+    <div class="mcell strategic-cell"><b>战略优先 · 10</b><span>P3 · P4 · C1 · C2 · C3<br>G3 · G5 · G6 · F2 · F4</span></div>
+    <div class="mcell value-cell"><b>价值优先 · 7</b><span>P1 · C4 · G1 · G2 · G4 · R1 · R2</span></div>
+    <div class="mcell value-cell"><b>价值优先 · 1</b><span>P2</span><br><small>高频刚需，创新有限</small></div>
+    <div class="mcell axis bottom">中</div>
+    <div class="mcell innovation-cell bottom"><b>创新储备 · 4</b><span>F3 · R3 · R4 · R5</span></div>
+    <div class="mcell bottom"><b>组合能力 · 2</b><span>F1 · R6</span></div>
+    <div class="mcell bottom"><b>--</b><small>当前无独立场景</small></div>
+  </div>
+
+  <aside class="principle">
+    <h3>安全不删除机会，安全决定落地形态</h3>
+    <p><strong>高商业价值不等于允许自主诊疗。</strong>读取、整理与检测可先自动运行；诊断、医嘱、处方、签署、支付和对外发送由责任人员确认；高不确定场景先在仿真环境验证。</p>
+    <div class="steps"><span class="step">自动协作</span><span class="arrow">→</span><span class="step">人工确认</span><span class="arrow">→</span><span class="step">仿真先行</span></div>
+  </aside>
+</section>
+
+<div class="fig-footer">
+  <span>商业价值 = 效率 · 质量 · 财务 · 患者服务　｜　创新性 = 动态状态 · 多步工具 · 异常恢复 · 长期协调 · 可验证闭环</span>
+  <span>初步机会判断 · 需按医院类型与真实业务基线重新校准</span>
+</div>
+
+</body>
+</html>

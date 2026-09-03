@@ -1,4 +1,4 @@
-> **AutoMedBench: Towards Medical Auto-Research with Agentic AI Models**
+> **AutoMedBench: Towards Medical AutoResearch with Agentic AI Models**
 >
 > Junqi Liu、Selena 等（完整作者与机构待核验）
 >

@@ -2,7 +2,7 @@
 >
 > Yixing Jiang、Kameron C. Black、Danny Park、James Zou、Andrew Y. Ng、Jonathan H. Chen 等（Stanford）
 >
-> + 原文：NEJM AI 2(6)，DOI [10.1056/AIdbp2500144](https://doi.org/10.1056/AIdbp2500144)；本阅读版转换自预印本 [arXiv:2501.14654](https://arxiv.org/abs/2501.14654)（与正式版内容可能有差异）
+> + 正式版：**MedAgentBench: A Virtual EHR Environment to Benchmark Medical LLM Agents**，NEJM AI 2(9)，DOI [10.1056/AIdbp2500144](https://doi.org/10.1056/AIdbp2500144)；本阅读版转换自题名含 “Realistic” 的预印本 [arXiv:2501.14654](https://arxiv.org/abs/2501.14654)（与正式版内容可能有差异）
 > + 本地核验 PDF：`outputs/papers/pdf/2501.14654_MedAgentBench.pdf`（Git 忽略）
 > + 本文件为 MinerU（vlm）机器转换的英文阅读版，未翻译；逐字引用、公式与数据核验以 PDF 原文为准。转换日期 2026-08-25。
 

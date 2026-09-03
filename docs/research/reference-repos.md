@@ -20,3 +20,4 @@
 | synthea | github.com/synthetichealth/synthea | Apache-2.0 | 2026-08-26 | d9d07a6 | 合成患者一生就诊史生成器（FHIR R4 / CSV / C-CDA / CPCDS）；教学楔子"事实层金标准"与治理轨沙盘数据源 |
 | Awesome-LLM-Patient-Simulators | github.com/FreedomIntelligence/Awesome-LLM-Patient-Simulators | 无 LICENSE 文件（内部参考用） | 2026-08-26 | 1651ea5 | LLM 患者模拟器生态清单；后续选型索引 |
 | simple-evals | github.com/openai/simple-evals | MIT | 2026-08-26 | 652c89d | HealthBench 数据（48,562 条 rubric）与评委代码；评分层方法论参考 |
+| ppt-master | github.com/hugohe3/ppt-master | MIT | 2026-09-03 | 6a8e91e | 文档/主题 → 原生可编辑 PPTX 的 agent skill（51.7k stars）；非纯参考——经 `.claude/skills/ppt-master` 符号链接作为工作 skill 启用，依赖装在 uv `ppt-master` group；用于把 `docs/` 论文阅读版与平台文档转汇报 PPT |
